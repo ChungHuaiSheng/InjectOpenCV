@@ -133,6 +133,7 @@ namespace InjectOpenCV
             //imgResult.Clone();
             imgResult = imgResult.CopyMakeBorder(2,2,2,2,BorderTypes.Constant,Scalar.Black);
             var imgbit = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(imgResult);
+            //Report need shift defect Mark
 
 
             pictureBox1.Image = imgbit;
