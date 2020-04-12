@@ -105,15 +105,35 @@ namespace InjectOpenCV
                     //Check Hole and FitCircle in the same side
                     if (Math.Pow((Math.Pow(rtn[0] - cX, 2) + Math.Pow(rtn[1] - cY, 2)), 0.5) < rtn[2])
                     {
-                        imgO.Circle((int)rtn[0], (int)rtn[1], (int)rtn[2], Scalar.Red, 2);
+                        imgO.Circle((int)rtn[0], (int)rtn[1], (int)rtn[2] + 4, Scalar.Red, 2);
                     }
                 }
             }
 
-            //TODO Create Mask Image
+            //20200412 for defect Mark
+            var imgMask = new Mat();
+            Cv2.Threshold(imgGray, imgMask, 60, 255, ThresholdTypes.BinaryInv);
+            var imgResult = new Mat(imgO.Size(), imgO.Type());
+            Cv2.BitwiseNot(imgMask, imgMask);
+            Cv2.CopyTo(imgO, imgResult, imgMask);
 
-            imgth.ConvertTo(imgth, MatType.CV_8U);
-            var imgbit = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(imgO);
+            for (var y = 0; y < imgResult.Height; y++)
+            {
+                for (var x = 0; x < imgResult.Width; x++)
+                {
+                    if (imgMask.Get<int>(y, x) == 0)
+                    {
+                        Vec3b color = imgResult.Get<Vec3b>(y, x);
+                        color.Item2 = 255;
+                        imgResult.Set(y, x, color);
+                    }
+                }
+            }
+            var imgOut = new Mat(new OpenCvSharp.Size(imgResult.Rows + 4, imgResult.Cols + 4), imgResult.Type());
+            //imgResult.Clone();
+            imgResult = imgResult.CopyMakeBorder(2,2,2,2,BorderTypes.Constant,Scalar.Black);
+            var imgbit = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(imgResult);
+
 
             pictureBox1.Image = imgbit;
         }
